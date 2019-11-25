@@ -67,6 +67,10 @@ class Item():
 
     def aumentar_nivel(self):
         self.nivel +=1
+
+    def definir_item_drop(self,lista):
+        self.lista = lista
+
 class Inventory():    
     def __init__(self):
         self.items = []
@@ -94,26 +98,26 @@ class Inventory():
             item.quantidade -= 1
             if item.quantidade <= 0:
                 self.items.remove(item)
-            if item.nome == "Baú nível 1":
+            if item.tipo == "Baú":
                 a = random.randint(1,6)
                 if a == 1:
-                    inventory.add_item(espada_madeira)
-                    item = "Espada de Madeira"
+                    inventory.add_item(item.lista[0])
+                    item = item.lista[0].nome
                 elif a == 2:
-                    inventory.add_item(oculos_de_disfarce)
-                    item = "Óculos de disfarce"
+                    inventory.add_item(item.lista[1])
+                    item = item.lista[1].nome
                 elif a == 3:
-                    inventory.add_item(avental)
-                    item = "Avental"
+                    inventory.add_item(item.lista[2])
+                    item = item.lista[2].nome
                 elif a == 4:
-                    inventory.add_item(luvas_de_mendigo)
-                    item = "Luvas de Mendigo"
+                    inventory.add_item(item.lista[3])
+                    item = item.lista[3].nome
                 elif a == 5:
-                    inventory.add_item(cueca_furada)
-                    item = "Cueca Furada"
+                    inventory.add_item(item.lista[4])
+                    item = item.lista[4].nome
                 elif a == 6:
-                    inventory.add_item(crocs)
-                    item = "Crocs"
+                    inventory.add_item(item.lista[5])
+                    item = item.lista[5].nome
                 pop = pygame.image.load("assets/interface/mensagempopupsemfundo.png").convert_alpha()
                 screen.blit(pop, (0,0))
                 texto = "Você recebeu:"
@@ -138,7 +142,7 @@ class Inventory():
                                 jogo.mochila()
                             elif x>=767 and x<= 912 and y>=524 and y<=581:
                                 jogo.mochila()
-        if item.equipado == 0 and item.tipo not in self.equipamentos_equipados:
+        if item.equipado == 0 and item.tipo not in self.equipamentos_equipados and per.nivel>item.nivel_necessario:
             item.equipado = 1
             per.ataque += item.ataque
             per.defesa += item.defesa
@@ -193,13 +197,13 @@ class Inventory():
                 aaa += 1
                 pass
             else:
-                xa = fonte22.render(str(objeto+(self.pagina*16)), True, Branco)
-                screen.blit(xa, (215, y))
+                xa = fonte22.render(str(p.nivel_necessario), True, Branco)
+                screen.blit(xa, (220, y))
                 if p.nivel != 0:
                     nome = fonte22.render(str(p.nome)+' + '+str(p.nivel), True, Branco)
                 else:
                     nome = fonte22.render(p.nome, True, Branco)
-                screen.blit(nome, (245,y))
+                screen.blit(nome, (270,y))
                 ataque = fonte22.render(str(p.ataque), True, Branco)
                 ataque_rect = ataque.get_rect(center =(595,y+9))
                 screen.blit(ataque, (ataque_rect))
@@ -1512,8 +1516,8 @@ class Game():
             self.pagina_localizacao = 1
         if id == 1:
             if self.pagina_localizacao == 1:
-                nom_inimigos = ["Bakugo Criança","Monstro Gigante","Monstro de Lama","Gran Torino","Innsmouth","Gran Torino","Black Nomu"]            
-                desc = ["Nível 1","Nível 2","Nível 3","Nível 26","Nível 27","Nível 28","Nível 29"]
+                nom_inimigos = ["Bakugo Criança","Monstro de Lama","Gran Torino","Innsmouth","Gran Torino","Black Nomu","Nomu de 4 Olhos"]            
+                desc = ["Nível 1","Nível 3","Nível 26","Nível 27","Nível 28","Nível 29","Nível 30"]
                 self.mostrar_inimigos(nom_inimigos,desc)
                 if per.nivel>=1:
                     ir1 = pygame.image.load("assets/irverde.png")
@@ -1587,8 +1591,8 @@ class Game():
                                         pygame.quit()
                                         exit()
             if self.pagina_localizacao == 2:
-                nom_inimigos = ["Nomu de 4 olhos", "Nomu de asas","Stain BOSS"]            
-                desc = ["Nível 30","Nível 31","Nível 32"]
+                nom_inimigos = ["Nomu de asas","Stain BOSS"]            
+                desc = ["Nível 31","Nível 32"]
                 self.mostrar_inimigos(nom_inimigos,desc)
                 if per.nivel>=30:
                     ir1 = pygame.image.load("assets/irverde.png")
@@ -1600,14 +1604,8 @@ class Game():
                 else:
                     ir2 = pygame.image.load("assets/ircinza.png")
                 ir2_rect = ir2.get_rect(topleft=(1060,293))
-                if per.nivel>=32:
-                    ir3 = pygame.image.load("assets/irverde.png")
-                else:
-                    ir3 = pygame.image.load("assets/ircinza.png")
-                ir3_rect = ir3.get_rect(topleft=(1060,354))
                 screen.blit(ir1,(ir1_rect))
                 screen.blit(ir2,(ir2_rect))
-                screen.blit(ir3,(ir3_rect))
                 pygame.display.flip()
                 done = False
                 while done is False:
@@ -2718,7 +2716,6 @@ per = Personagem("Teste")
 
 
 x = 1
-bau_nivel_1 = Item("Baú nível 1", "Baú",0,0,0,1,0,0,0,0,0)
 #Armas)
 espada_madeira = Item("Espada de Madeira", "Arma", 2, 0, 1, 1, 0, 1, 101,5,0)
 espada_enferrujada = Item("Espada enferrujada","Arma",4,2,5,1,0,2,102,25,0)
@@ -2833,6 +2830,25 @@ inventory.add_item(Item("Madeira", "Material", 0, 0, 50, 1, 0, 0, 0, 0,0))
 inventory.add_item(Item("Mistura", "Material", 0, 0, 80, 1, 0, 0, 0, 5,0))
 inventory.add_item(Item("Cola", "Material", 0, 0, 80, 1, 0, 0, 6, 0,0))
 inventory.add_item(Item("Cola", "Material", 0, 0, 80, 1, 0, 0, 6, 0,0))
+bau_nivel_1 = Item("Baú nível 1", "Baú",0,0,0,1,0,0,1,0,0)
+lista = (espada_madeira,oculos_de_disfarce,avental,luvas_de_mendigo,cueca_furada,crocs)
+bau_nivel_1.definir_item_drop(lista)
+bau_nivel_2 = Item("Baú nível 2", "Baú",0,0,0,1,0,0,2,0,0)
+lista = (espada_madeira,oculos_de_disfarce,avental,luvas_de_mendigo,cueca_furada,crocs)
+bau_nivel_2.definir_item_drop(lista)
+bau_nivel_4 = Item("Baú nível 4", "Baú",0,0,0,1,0,0,3,0,0)
+bau_nivel_8 = Item("Baú nível 8", "Baú",0,0,0,1,0,0,4,0,0)
+bau_nivel_16 = Item("Baú nível 16", "Baú",0,0,0,1,0,0,5,0,0)
+bau_nivel_20 = Item("Baú nível 20", "Baú",0,0,0,1,0,0,6,0,0)
+bau_nivel_25 = Item("Baú nível 25", "Baú",0,0,0,1,0,0,7,0,0)
+bau_nivel_30 = Item("Baú nível 30", "Baú",0,0,0,1,0,0,8,0,0)
+bau_nivel_35 = Item("Baú nível 35", "Baú",0,0,0,1,0,0,9,0,0)
+bau_nivel_40 = Item("Baú nível 40", "Baú",0,0,0,1,0,0,10,0,0)
+bau_nivel_44 = Item("Baú nível 44", "Baú",0,0,0,1,0,0,11,0,0)
+bau_nivel_48 = Item("Baú nível 48", "Baú",0,0,0,1,0,0,12,0,0)
+bau_nivel_52 = Item("Baú nível 52", "Baú",0,0,0,1,0,0,13,0,0)
+bau_nivel_56 = Item("Baú nível 56", "Baú",0,0,0,1,0,0,14,0,0)
+bau_nivel_60 = Item("Baú nível 60", "Baú",0,0,0,1,0,0,15,0,0)
 while x<3:
     inventory.add_item(armadura_enferrujada)
     x += 1
